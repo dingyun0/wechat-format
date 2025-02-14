@@ -33,7 +33,18 @@ var app = new Vue({
         default: defaultTheme,
         lupeng: lupengTheme
       },
-      aboutDialogVisible: false
+      aboutDialogVisible: false,
+      footerImage: '',
+      showFooterImage: false,
+      uploadedImages: {},
+      currentCardIndex: 1
+    }
+  },
+  computed: {
+    cardCount() {
+      // 通过分割 === 来计算卡片数量
+      const content = this.editor ? this.editor.getValue() : this.source;
+      return content.split('===').filter(section => section.trim()).length - 1; // -1 是因为第一部分是主标题
     }
   },
   mounted () {
@@ -52,7 +63,8 @@ var app = new Vue({
     this.wxRenderer = new WxRenderer({
       theme: this.styleThemes.default,
       fonts: this.currentFont,
-      size: this.currentSize
+      size: this.currentSize,
+      uploadedImages: this.uploadedImages
     })
     axios({
       method: 'get',
@@ -63,32 +75,59 @@ var app = new Vue({
   },
   methods: {
     renderWeChat: function (source) {
-      var output = marked(source, { renderer: this.wxRenderer.getRenderer() })
-      if (this.wxRenderer.hasFootnotes()) {
-        output += this.wxRenderer.buildFootnotes()
+      var output = '';
+      // 如果有底图，添加带背景的容器
+      if (this.showFooterImage && this.footerImage) {
+        output += `<div class="content-with-bg" style="background-image: url('${this.footerImage}');">`;
       }
-      return output
+      
+      // 将内容分割成主标题和卡片部分
+      const [mainTitle, ...cards] = source.split('===').filter(section => section.trim());
+      
+      // 添加主标题部分
+      output += '<div class="main-title-section">';
+      output += marked(mainTitle.trim(), { renderer: this.wxRenderer.getRenderer() });
+      output += '</div>';
+      
+      // 添加卡片容器
+      output += '<div class="cards-container">';
+      
+      // 处理每个卡片
+      cards.forEach(card => {
+        output += '<div class="content-card">';
+        output += marked(card.trim(), { renderer: this.wxRenderer.getRenderer() });
+        output += '</div>';
+      });
+      
+      output += '</div>'; // 关闭卡片容器
+      
+      if (this.showFooterImage && this.footerImage) {
+        output += '</div>';
+      }
+      return output;
     },
     editorThemeChanged: function (editorTheme) {
       this.editor.setOption('theme', editorTheme)
     },
     fontChanged: function (fonts) {
       this.wxRenderer.setOptions({
-        fonts: fonts
+        fonts: fonts,
+        uploadedImages: this.uploadedImages
       })
       this.refresh()
     },
     sizeChanged: function(size){
       this.wxRenderer.setOptions({
-        size: size
+        size: size,
+        uploadedImages: this.uploadedImages
       })
       this.refresh()
     },
     themeChanged: function(themeName){
-      var themeName = themeName;
       var themeObject = this.styleThemes[themeName];
       this.wxRenderer.setOptions({
-        theme: themeObject
+        theme: themeObject,
+        uploadedImages: this.uploadedImages
       })
       this.refresh()
     },
@@ -119,6 +158,76 @@ var app = new Vue({
           message: '未能复制到剪贴板，请全选后右键复制', type: 'warning'
         })
       }
+    },
+    handleFooterImageUpload(file) {
+      const isImage = file.type.startsWith('image/');
+      const isLt2M = file.size / 1024 / 1024 < 5;
+
+      if (!isImage) {
+        this.$message.error('只能上传图片文件!');
+        return false;
+      }
+      if (!isLt2M) {
+        this.$message.error('图片大小不能超过 2MB!');
+        return false;
+      }
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        this.footerImage = reader.result;
+        this.showFooterImage = true;
+        this.refresh();
+      };
+      return false;
+    },
+    removeFooterImage() {
+      this.footerImage = '';
+      this.showFooterImage = false;
+      this.refresh();
+    },
+    handleImageUpload(file, type) {
+      const isImage = file.type.startsWith('image/');
+      const isLt5M = file.size / 1024 / 1024 < 5;
+
+      if (!isImage) {
+        this.$message.error('只能上传图片文件!');
+        return false;
+      }
+      if (!isLt5M) {
+        this.$message.error('图片大小不能超过 5MB!');
+        return false;
+      }
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const imageUrl = reader.result;
+        // 确保当前选中的卡片索引不超过实际卡片数量
+        const cardIndex = Math.min(this.currentCardIndex || 1, this.cardCount);
+        
+        // 根据类型和卡片索引设置不同的占位符
+        let placeholder;
+        if (type === 'QR') {
+          placeholder = `[图片QR${cardIndex}]`;
+        } else {
+          placeholder = `[图片${type}_${cardIndex}]`;
+        }
+        this.uploadedImages[placeholder] = imageUrl;
+        this.refresh();
+      };
+      return false;
+    }
+  },
+  watch: {
+    cardCount: {
+      handler(newCount) {
+        // 如果当前选中的卡片索引超过了实际卡片数量，则自动调整为最后一张卡片
+        if (this.currentCardIndex > newCount) {
+          this.currentCardIndex = Math.max(newCount, 1);
+        }
+      },
+      immediate: true
     }
   }
 })

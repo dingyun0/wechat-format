@@ -21,45 +21,64 @@
       <el-header class="top">
         <div class="logo">{{ title }}</div>
         <el-form size="mini" class="ctrl" :inline=true>
-          <el-form-item label="Editor Themes">
-            <el-select v-model="currentEditorTheme" size="mini" placeholder="选择字体" @change="editorThemeChanged">
-              <el-option v-for="editorTheme in editorThemes" :key="editorTheme.value" :label="editorTheme.label"
-                :value="editorTheme.value">
-              </el-option>
-            </el-select>
+          <el-form-item label="底图">
+            <el-upload
+              action=""
+              :show-file-list="false"
+              :before-upload="handleFooterImageUpload"
+              accept="image/*"
+            >
+              <el-button size="mini" type="primary" icon="el-icon-picture">
+                {{ footerImage ? '更换底图' : '上传底图' }}
+              </el-button>
+            </el-upload>
+            <el-button 
+              v-if="showFooterImage" 
+              size="mini" 
+              type="danger" 
+              icon="el-icon-delete"
+              @click="removeFooterImage"
+            >
+              移除底图
+            </el-button>
           </el-form-item>
-          <el-form-item label="Fonts">
-            <el-select v-model="currentFont" size="mini" placeholder="选择字体" @change="fontChanged">
-              <el-option v-for="font in builtinFonts"  :style="{fontFamily: font.value}"
-                :key="font.value"
-                :label="font.label"
-                :value="font.value">
-                <span style="float: left">{{ font.label }}</span>
-                <span style="float: right; color: #8492a6; font-size: 13px" >Abc</span>
-              </el-option>
+          <el-form-item label="图片上传">
+            <el-select v-model="currentCardIndex" size="mini" style="width: 100px; margin-right: 8px;">
+              <el-option
+                v-for="i in Math.max(cardCount, 1)"
+                :key="i"
+                :label="`卡片${i}`"
+                :value="i"
+              />
             </el-select>
-          </el-form-item>
-          <el-form-item label="Font Size">
-            <el-select v-model="currentSize" size="mini" placeholder="选择段落字体大小" @change="sizeChanged">
-              <el-option v-for="size in sizeOption"
-                :key="size.value"
-                :label="size.label"
-                :value="size.value">
-                <span style="float: left">{{ size.label }}</span>
-                <span style="float: right; color: #8492a6; font-size: 13px" >{{ size.desc }}</span>
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Themes">
-            <el-select v-model="currentTheme" size="mini" placeholder="选择主题样式" @change="themeChanged">
-              <el-option v-for="theme in themeOption" :key="theme.value" :label="theme.label" :value="theme.value">
-                <span style="float: left">{{ theme.label }}</span>
-                <span style="float: right; color: #8492a6; font-size: 13px">{{ theme.author }}</span>
-              </el-option>
-            </el-select>
+            <div class="upload-group">
+              <el-upload
+                class="image-uploader"
+                action=""
+                :show-file-list="false"
+                :before-upload="file => handleImageUpload(file, '1')"
+              >
+                <el-button size="mini">上传图片1</el-button>
+              </el-upload>
+              <el-upload
+                class="image-uploader"
+                action=""
+                :show-file-list="false"
+                :before-upload="file => handleImageUpload(file, '2')"
+              >
+                <el-button size="mini">上传图片2</el-button>
+              </el-upload>
+              <el-upload
+                class="image-uploader"
+                action=""
+                :show-file-list="false"
+                :before-upload="file => handleImageUpload(file, 'QR')"
+              >
+                <el-button size="mini">上传二维码</el-button>
+              </el-upload>
+            </div>
           </el-form-item>
         </el-form>
-        <el-button class="about" @click="aboutDialogVisible = true">关于</el-button>
       </el-header>
       <el-main class="main-body">
         <el-row :gutter="10" class="main-section">

@@ -1,7 +1,6 @@
 var defaultTheme = {
   BASE: {
     'text-align': 'left',
-    'color': '#3f3f3f',
     'line-height': '1.5'
   },
   BASE_BLOCK: {
@@ -14,7 +13,7 @@ var defaultTheme = {
       'text-align': 'center',
       'font-weight': 'normal',
       'text-align': 'center',
-      'margin': '80px 10px 40px 10px'
+      'margin': '40px 10px 40px 10px'
     },
     h3: {
       'font-weight': 'bold',
@@ -45,7 +44,7 @@ var defaultTheme = {
     image: {
       'border-radius': '4px',
       'display': 'block',
-      'margin': '20px auto',
+      'margin': '20px auto 0px auto',
       'width': '100%',
     },
     image_org: {

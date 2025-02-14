@@ -139,3 +139,205 @@ section {
   position: relative;
   font-family: Consolas,"Liberation Mono",Menlo,Courier,monospace;
 }
+.preview .footer-image {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.preview .footer-image img {
+  max-width: 100%;
+  height: auto;
+}
+/* 修改背景图容器样式 */
+.content-with-bg {
+  position: relative;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;  /* 改为 cover 确保背景图完全覆盖 */
+  min-height: 100%;  /* 确保容器至少和内容一样高 */
+  padding: 0; /* 移除padding，由cards-container控制内边距 */
+}
+
+.content-with-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.content-with-bg > * {
+  position: relative;
+  z-index: 2;  /* 确保内容在遮罩层之上 */
+  padding: 20px;
+}
+
+/* 移除之前的底图样式 */
+.preview .footer-image {
+  display: none;
+}
+
+/* 主标题区域样式 */
+.main-title-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.main-title-section h2 {
+  font-size: 28px;
+  color: red;
+  margin-bottom: 16px;
+}
+
+.main-title-section p {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  margin: 4px 0;  /* 减小段落间距 */
+}
+
+/* 卡片容器样式 */
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px;
+}
+
+/* 单个卡片样式 */
+.content-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 卡片内部标题样式 */
+.content-card h1 {
+  font-size: 24px;
+  margin-bottom:0;
+  color: #333;
+}
+
+.content-card h2 {
+  font-size: 20px;
+  margin: 16px 0 12px;
+  color: #666;
+}
+
+/* 卡片内部段落样式 */
+.content-card p {
+  margin: 4px 0;  /* 减小段落间距 */
+  line-height: 1.6;
+  color: #444;
+}
+
+/* 卡片内部图片样式 */
+.content-card img {
+  display: block;
+  width: 100%;
+  margin: 12px auto;  /* 图片上下间距保持稍大 */
+  border-radius: 8px;
+}
+
+/* 卡片底部区域样式 */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* 左上角文案样式 */
+.footer-left {
+  font-size: 10px;
+  color: #999;
+  line-height: 1.4;
+  max-width: 40%;
+}
+
+/* 右下角区域样式 */
+.footer-right {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+/* 右下角文本区域样式 */
+.footer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10px;
+  color: #999;
+  text-align: right;
+  line-height: 1.4;
+}
+
+/* 二维码图片样式 */
+.footer-qrcode {
+  width: 64px;
+  height: 64px;
+}
+
+/* 图片上传按钮组样式 */
+.upload-group {
+  display: flex;
+  gap: 8px;
+}
+
+.image-uploader .el-button {
+  padding: 7px 12px;
+}
+
+/* 内容图片容器 */
+.content-images {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+/* 内容图片样式 */
+.content-images .content-image {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+
+/* 确保图片保持原始比例 */
+.content-images img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* 全局底部文案样式 */
+.global-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 40px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  text-align: center;
+}
+
+.global-footer-text {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}

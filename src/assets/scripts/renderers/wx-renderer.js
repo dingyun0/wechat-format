@@ -90,8 +90,49 @@ var WxRenderer = function (opts) {
       }
     }
     renderer.paragraph = function (text) {
-      return '<p ' + S('p') + '>' + text + '</p>'
-    }
+      if (text.startsWith('[') && text.includes(']')) {
+        const lines = text.split('\n').filter(line => line.trim());
+        
+        // 处理图片占位符
+        if (lines.length === 2 && lines.every(line => line.match(/^\[图片[12]_\d+\]$/))) {
+          const images = lines.map(line => {
+            const placeholder = line;
+            const imageUrl = this.opts.uploadedImages && this.opts.uploadedImages[placeholder] || '';
+            return `<img class="content-image" src="${imageUrl}" alt="内容图片"/>`;
+          });
+          return `<div class="content-images">${images.join('')}</div>`;
+        }
+        
+        // 处理卡片底部信息
+        if (lines.length >= 5 && lines.every(line => line.includes('['))) {
+          const leftText = lines[0].match(/\[(.*?)\]/)[1];
+          const rightTexts = lines.slice(1, 4).map(line => line.match(/\[(.*?)\]/)[1]);
+          const qrcodeText = lines[4];
+          
+          const qrcodeUrl = this.opts.uploadedImages && this.opts.uploadedImages[qrcodeText] || '';
+          
+          return `
+            <div class="card-footer">
+              <div class="footer-left">${leftText}</div>
+              <div class="footer-right">
+                <div class="footer-text">
+                  ${rightTexts.map(text => `<span>${text}</span>`).join('')}
+                </div>
+                <img class="footer-qrcode" src="${qrcodeUrl}" alt="二维码" />
+              </div>
+            </div>
+          `;
+        }
+        
+        // 处理全局底部文案 - 直接返回原始文本
+        if (lines.length === 4 && lines.every(line => line.match(/^\[.*\]$/))) {
+          return text;  // 直接返回原始文本，不进行 HTML 转换
+        }
+      }
+      
+      text = text.replace(/\n/g, '<br>');
+      return '<p ' + S('p') + '>' + text + '</p>';
+    }.bind(this);
     renderer.blockquote = function (text) {
       return '<blockquote ' + S('blockquote') + '>' + text + '</blockquote>'
     }
@@ -133,8 +174,13 @@ var WxRenderer = function (opts) {
       return '<p ' + S('ol') + '>' + text + '</p>';
     }
     renderer.image = function (href, title, text) {
+      // 处理引用式图片语法 ![图片1][图片1]
+      const placeholder = `[${text}]`;
+      if (this.opts.uploadedImages && this.opts.uploadedImages[placeholder]) {
+        href = this.opts.uploadedImages[placeholder];
+      }
       return '<img ' + S(ENV_STETCH_IMAGE ? 'image' : 'image_org') + ' src="' + href + '" title="'+title+'" alt="'+text+'"/>'
-    }
+    }.bind(this);
     renderer.link = function (href, title, text) {
       if (href.indexOf('https://mp.weixin.qq.com') === 0) {
         return '<a href="' + href +'" title="' + (title || text) + '" ' + S('wx_link') +'>' + text + '</a>'; 
